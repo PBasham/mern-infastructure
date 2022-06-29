@@ -1,23 +1,38 @@
-// users-api.js
+import { getToken } from './users-service';
 
 // This is the base path of the Express route we'll define
 const BASE_URL = '/api/users';
 
 export async function signUp(userData) {
-  // Fetch uses an options object as a second arg to make requests
-  // other than basic GET requests, include data, headers, etc. 
-  const res = await fetch(BASE_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    // Fetch requires data payloads to be stringified
-    // and assigned to a body property on the options object
-    body: JSON.stringify(userData)
-  });
-  // Check if request was successful
-  if (res.ok) {
-    // res.json() will resolve to the JWT
-    return res.json();
-  } else {
-    throw new Error('Invalid Sign Up');
+  return sendRequest(BASE_URL, "POST", userData)
+}
+
+export async function login(credentials) {
+ return sendRequest(`${BASE_URL}/login`, "POST", credentials)
+}
+
+export async function checkToken() {
+  return sendRequest(`${BASE_URL}/check-token`)
+}
+
+/*--- Helper Functions ---*/
+
+async function sendRequest(url, method = "get", payload = null) {
+  const options = { method }
+  if (payload) {
+    options.headers = {"Content-type": "application/json"}
+    options.body = JSON.stringify(payload)
   }
+  const token = getToken();
+  if (token) {
+    // Ensure the headers object exists
+    options.headers = options.headers || {};
+    // Add token to an Authorization header
+    // Prefacing with 'Bearer' is recommended in the HTTP specification
+    options.headers.Authorization = `Bearer ${token}`;
+  }
+  
+  const res = await fetch(url, options)
+  if (res.ok) return res.json()
+  throw new Error("Bad Request")
 }

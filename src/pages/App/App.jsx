@@ -33,7 +33,7 @@ const [user, setUser] = useState(getUser())
       </>
         :
         <Routes>
-          <Route path="/" element={<AuthPage setUser={setUser}/>} />
+          <Route path="/" element={<AuthPage user={user} setUser={setUser}/>} />
 
         </Routes>
       }
